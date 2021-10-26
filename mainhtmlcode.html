@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="referrer" content="unsafe-url" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui" />
+
+<meta name="author" content="Freeway Interactive" />
+
+<title>Sniper Clash 3D</title>
+
+<script type="text/javascript">
+var GAME_ID = 'sniper';
+var WASM_FILE_EXT = 'wasm';
+
+var idnet_appid = '5cfe43fde694aa423be93f73';
+var idnet_leaderboard_id = 'Champion Stars';
+var y8_game_id = '168002';
+</script>
+
+<style>
+body {
+margin: 0;
+padding: 0;
+white-space: nowrap;
+}
+
+#loginpage {
+position: absolute;
+
+visibility: hidden;
+
+background-image: url(https://eusinfo.pt/seo/plugins/QuickWebProxy/miniProxy_orig.php?https://storage.y8.com/y8-studio/html5/akeemywka/sniper_clash_3d_v4/img_y8/loginpage_back.jpg);
+background-position: center;
+background-size: cover;
+
+width: 100%;
+height: 100%;
+
+display: flex;
+flex-direction: column;
+justify-content: center;
+}
+
+#loginbuttons {
+display: flex;
+flex-direction: row;
+
+flex-wrap: wrap;
+
+justify-content: center;
+
+z-index: 10;
+}
+
+a.button_online {
+width: 347px;
+height: 338px;
+background-image: url(https://eusinfo.pt/seo/plugins/QuickWebProxy/miniProxy_orig.php?https://storage.y8.com/y8-studio/html5/akeemywka/sniper_clash_3d_v4/img_y8/btn_online.png);
+}
+
+a.button_online:hover {
+filter: brightness(1.15);
+}
+
+a.button_guest {
+width: 347px;
+height: 338px;
+background-image: url(https://eusinfo.pt/seo/plugins/QuickWebProxy/miniProxy_orig.php?https://storage.y8.com/y8-studio/html5/akeemywka/sniper_clash_3d_v4/img_y8/btn_guest.png);
+}
+
+a.button_guest:hover {
+filter: brightness(1.15);
+}
+
+#logo {
+position: absolute;
+right: 0;
+left: 0;
+bottom: 0;
+margin: auto;
+
+transform: scale(0.5);
+}
+
+@media (orientation: landscape) {
+#loginbuttons {
+flex-wrap: nowrap;
+}
+}
+
+@media (max-height: 320px), (max-width: 320px) {
+#loginbuttons {
+transform: scale(0.5);
+}
+
+a.button_online {
+}
+}
+</style>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-130581684-3"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+
+gtag('config', 'UA-130581684-3', {
+cookie_flags: 'secure;samesite=none'
+});
+</script>
+
+<script src="https://rawcdn.githack.com/zackiscool000/HTMLDesigninglol/a89056c8864ff96fcbfefa60298d4bd30eb92c81/jquery-3.3.1.min.js"></script>
+
+<script src="https://rawcdn.githack.com/zackiscool000/HTMLDesigninglol/a89056c8864ff96fcbfefa60298d4bd30eb92c81/main.js"></script>
+<link href="https://rawcdn.githack.com/zackiscool000/HTMLDesigninglol/b71dee413c3e917da1bfca6f73e2bdbd2b01b48f/main.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body oncontextmenu="return false;">
+<div id="viewport">
+<canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+
+<div id="loginpage">
+<img id="logo" src="https://eusinfo.pt/seo/plugins/QuickWebProxy/miniProxy_orig.php?https://storage.y8.com/y8-studio/html5/akeemywka/sniper_clash_3d_v4/img_y8/logo_252x142.png" />
+
+<div id="loginbuttons">
+<a id="btn_online" class="button_online" href="#"></a>
+<a id="btn_guest" class="button_guest" href="#"></a>
+</div>
+</div>
+
+<div id="preloader">
+<div class="meter animate">
+<span style="width: 5%"><span></span></span>
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+var idnet_status;
+var idnet_userdata;
+var idnet_loggedin;
+
+function JS_ShowHighscores() {
+ID.GameAPI.Leaderboards.list({table: idnet_leaderboard_id});
+}
+
+function JS_ShowAchievements() {
+ID.GameAPI.Achievements.list();
+}
+
+function JS_ShowY8VideoAd(type, on_finish) {
+trace("calling Y8 midroll...");
+try {
+ID.ads.display(function () {
+on_finish(true);
+});
+
+} catch (e) {
+on_finish(false);
+}
+}
+
+function JS_SaveSession(json) {
+if (!idnet_loggedin)
+return;
+
+setTimeout(function () {
+ID.api('user_data/submit', 'POST', {"key": "session", "value": json}, function(response) {
+trace("user_data/submit: ", JSON.stringify(response));
+});
+}, 1);
+}
+
+function JS_SubmitAchievement(key, title) {
+if (!idnet_loggedin)
+return;
+
+setTimeout(function () {
+var achievement = {
+achievement: title,
+achievementkey: key
+};
+
+trace(JSON.stringify(achievement));
+
+ID.GameAPI.Achievements.save(achievement, function (data) {
+trace("Achievements.save: ", JSON.stringify(data));
+});
+}, 1);
+}
+
+function JS_SubmitScore(value) {
+setTimeout(function () {
+ID.GameAPI.Leaderboards.save({table: idnet_leaderboard_id, points: value, highest: true}, function (response) {
+trace("leaderboard/submit", response);
+});
+}, 1);
+}
+
+function idnet_callback(response) {
+trace('idnet_callback', response);
+
+if (!response || response.status !== "ok" || !response.authResponse) {
+idnet_status = "initialized";
+
+} else {
+var details = response.authResponse.details;
+
+ID.api('user_data/retrieve', 'POST', {"key": "session"}, function (response){
+trace("user_data/retrieve: ", response);
+
+var userinfo = {
+guest: false,
+nickname: (details && details.nickname) ? details.nickname : null,
+session: null
+};
+
+if (response && response.jsondata) {
+userinfo.session = response.jsondata;
+}
+
+idnet_loggedin = true;
+
+if (idnet_status == 'readytoplay') {
+
+} else {
+idnet_status = "loggedin";
+
+$('#loginpage').remove();
+
+window.__userinfo_json = JSON.stringify(userinfo);
+
+//ID.api('user_data/remove', 'POST', {key: 'session'}, function(response){
+// console.log(response);
+//});
+}
+});
+}
+}
+
+$('#btn_online').click(function() {
+trace("online mode chosen", idnet_status);
+
+if (idnet_status == "initialized") {
+idnet_status = "loggingin";
+ID.login(idnet_callback);
+}
+});
+
+$('#btn_guest').click(function() {
+trace("guest mode chosen", idnet_status);
+
+$('#loginpage').remove();
+
+window.__userinfo_json = JSON.stringify({
+guest: true,
+nickname: null,
+session: null
+});
+});
+
+window.idAsyncInit = function () {
+ID.Event.subscribe('id.init', function () {
+trace('id.init done');
+
+ID.ads.init(y8_game_id);
+
+setTimeout(function () {
+ID.GameAPI.init(idnet_appid, null, function (data, response) {
+trace('ID.GameAPI.init', response);
+
+document.getElementById('loginpage').style.visibility = 'visible';
+
+ID.getLoginStatus(function (response) {
+trace('ID.getLoginStatus', response);
+idnet_status = "initialized";
+
+idnet_callback(response);
+});
+});
+}, 250); // FIXME
+});
+
+ID.init({
+appId: idnet_appid
+});
+};
+
+(function(d, s, id){
+var js, fjs = d.getElementsByTagName(s)[0];
+if (d.getElementById(id)) {return;}
+js = d.createElement(s); js.id = id;
+js.src = document.location.protocol == 'https:' ? "https://rawcdn.githack.com/zackiscool000/HTMLDesigninglol/96f5812b89db0ff9a861166894383686aecc2f9f/sdk.js" : "https://rawcdn.githack.com/zackiscool000/HTMLDesigninglol/96f5812b89db0ff9a861166894383686aecc2f9f/sdk.js";
+fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'id-jssdk'));
+</script>
+
+</body>
+</html>
